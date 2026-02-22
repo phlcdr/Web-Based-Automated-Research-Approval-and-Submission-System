@@ -87,7 +87,7 @@ try {
                           END as display_title
                         FROM submissions s
                         WHERE s.group_id = ?
-                        ORDER BY s.submission_date DESC";
+                        ORDER BY s.created_at DESC";
     
     $submissions_stmt = $conn->prepare($submissions_sql);
     $submissions_stmt->execute([$group_id]);
@@ -95,7 +95,7 @@ try {
     
     // Format dates for better display
     foreach ($submissions as &$submission) {
-        $submission['submission_date_formatted'] = date('M j, Y g:i A', strtotime($submission['submission_date']));
+        $submission['submission_date_formatted'] = date('M j, Y g:i A', strtotime($submission['created_at']));
         if ($submission['approval_date']) {
             $submission['approval_date_formatted'] = date('M j, Y g:i A', strtotime($submission['approval_date']));
         }

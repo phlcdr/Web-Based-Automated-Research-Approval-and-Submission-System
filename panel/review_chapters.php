@@ -77,7 +77,7 @@ $stmt = $conn->prepare("
         type,
         context_type,
         context_id,
-        created_at as submission_date
+        created_at as created_at
     FROM notifications 
     WHERE user_id = ? AND is_read = 0
     ORDER BY created_at DESC 
@@ -120,7 +120,7 @@ if ($user_role == 'adviser') {
             WHERE rg.adviser_id = ? AND s.submission_type = 'chapter'
             ORDER BY 
                 CASE WHEN s.status = 'pending' THEN 0 ELSE 1 END,
-                s.submission_date DESC
+                created_at DESC
         ");
         $stmt->execute([$user_id, $user_id]);
         $chapters = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -1110,7 +1110,7 @@ $chapter_titles = [
                                                             <?php echo htmlspecialchars(substr($notif['message'], 0, 60)); ?><?php echo strlen($notif['message']) > 60 ? '...' : ''; ?>
                                                         </div>
                                                         <div class="notification-time">
-                                                            <?php echo date('M d, g:i A', strtotime($notif['submission_date'])); ?>
+                                                            <?php echo date('M d, g:i A', strtotime($notif['created_at'])); ?>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1286,10 +1286,10 @@ $chapter_titles = [
                                         </td>
                                         <td>
                                             <div class="mb-1">
-                                                <?php echo date('M d, Y', strtotime($chapter['submission_date'])); ?>
+                                                <?php echo date('M d, Y', strtotime($chapter['created_at'])); ?>
                                             </div>
                                             <small class="text-muted">
-                                                <?php echo date('h:i A', strtotime($chapter['submission_date'])); ?>
+                                                <?php echo date('h:i A', strtotime($chapter['created_at'])); ?>
                                             </small>
                                         </td>
                                         <td>

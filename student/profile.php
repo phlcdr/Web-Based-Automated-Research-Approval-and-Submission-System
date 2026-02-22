@@ -207,7 +207,7 @@ $stmt = $conn->prepare("
         type,
         context_type,
         context_id,
-        created_at as submission_date
+        created_at
     FROM notifications 
     WHERE user_id = ? AND is_read = 0
     ORDER BY created_at DESC 
@@ -231,7 +231,7 @@ $title = null;
 $chapters = [];
 if ($group) {
     // Get latest title submission
-    $stmt = $conn->prepare("SELECT * FROM submissions WHERE group_id = ? AND submission_type = 'title' ORDER BY submission_date DESC LIMIT 1");
+    $stmt = $conn->prepare("SELECT * FROM submissions WHERE group_id = ? AND submission_type = 'title' ORDER BY created_at DESC LIMIT 1");
     $stmt->execute([$group['group_id']]);
     $title = $stmt->fetch(PDO::FETCH_ASSOC);
     
@@ -1099,7 +1099,7 @@ function getProfilePictureUrl($profile_picture) {
                                                             <?php echo htmlspecialchars(substr($notif['message'], 0, 60)); ?><?php echo strlen($notif['message']) > 60 ? '...' : ''; ?>
                                                         </div>
                                                         <div class="notification-time">
-                                                            <?php echo $notif['submission_date'] ? date('M d, g:i A', strtotime($notif['submission_date'])) : 'Recently'; ?>
+                                                            <?php echo $notif['created_at'] ? date('M d, g:i A', strtotime($notif['created_at'])) : 'Recently'; ?>
                                                         </div>
                                                     </div>
                                                 </div>

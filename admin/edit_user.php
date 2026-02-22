@@ -18,31 +18,19 @@ if ($user_id <= 0) {
     exit();
 }
 
-// Helper function to determine notification redirect URL
-function getNotificationRedirectUrl($notification) {
-    switch($notification['type']) {
-        case 'user_registration':
-            return 'manage_users.php';
-        case 'title_submission':
-        case 'chapter_submission':
-            return 'manage_research.php';
-        case 'reviewer_assignment':
-            return 'manage_research.php';
-        case 'discussion_update':
-            return 'manage_research.php';
-        default:
-            return 'dashboard.php';
-    }
-}
-
 // Handle AJAX request to mark notification as read
-if (isset($_GET['mark_read']) && isset($_GET['notification_id'])) {
-    try {
-        $stmt = $conn->prepare("UPDATE notifications SET is_viewed = 1 WHERE notification_id = ? AND user_id = ?");
-        $stmt->execute([$_GET['notification_id'], $_SESSION['user_id']]);
-        echo json_encode(['success' => true]);
-    } catch (PDOException $e) {
-        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+if (isset($_POST['action']) && $_POST['action'] === 'mark_read') {
+    $notification_id = (int)($_POST['notification_id'] ?? 0);
+    if ($notification_id) {
+        try {
+            $stmt = $conn->prepare("UPDATE notifications SET is_read = 1 WHERE notification_id = ? AND user_id = ?");
+            $stmt->execute([$notification_id, $_SESSION['user_id']]);
+            echo json_encode(['success' => true]);
+        } catch (PDOException $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+    } else {
+        echo json_encode(['success' => false, 'error' => 'Invalid ID']);
     }
     exit;
 }
@@ -50,7 +38,7 @@ if (isset($_GET['mark_read']) && isset($_GET['notification_id'])) {
 // Handle AJAX request to get notification count
 if (isset($_GET['get_count'])) {
     try {
-        $stmt = $conn->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_viewed = 0");
+        $stmt = $conn->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0");
         $stmt->execute([$_SESSION['user_id']]);
         $count = $stmt->fetchColumn();
         echo json_encode(['count' => (int)$count]);
@@ -66,12 +54,12 @@ $total_unviewed = 0;
 
 try {
     // Get unviewed count
-    $stmt = $conn->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_viewed = 0");
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0");
     $stmt->execute([$_SESSION['user_id']]);
     $total_unviewed = (int)$stmt->fetchColumn();
     
     // Get recent notifications (last 10)
-    $stmt = $conn->prepare("SELECT * FROM notifications WHERE user_id = ? ORDER BY submission_date DESC LIMIT 10");
+    $stmt = $conn->prepare("SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 10");
     $stmt->execute([$_SESSION['user_id']]);
     $recent_notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
@@ -864,8 +852,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <?php if (count($recent_notifications) > 0): ?>
                                     <?php foreach ($recent_notifications as $notif): ?>
                                         <li>
-                                            <a href="<?php echo getNotificationRedirectUrl($notif); ?>" 
-                                            class="notification-item<?php echo $notif['is_viewed'] ? ' viewed' : ''; ?>" 
+                                            <a href="<?php echo get_notification_redirect_url($notif, 'admin'); ?>" 
+                                            class="notification-item<?php echo $notif['is_read'] ? ' viewed' : ''; ?>" 
                                             data-notification-id="<?php echo $notif['notification_id']; ?>">
                                                 <div class="d-flex align-items-start">
                                                     <div class="notification-icon <?php echo $notif['type']; ?>">
@@ -888,7 +876,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                             <?php echo htmlspecialchars(substr($notif['message'], 0, 60)) . (strlen($notif['message']) > 60 ? '...' : ''); ?>
                                                         </div>
                                                         <div class="notification-time">
-                                                            <?php echo date('M d, g:i A', strtotime($notif['submission_date'])); ?>
+                                                            <?php echo date('M d, g:i A', strtotime($notif['created_at'])); ?>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1251,8 +1239,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script>
         // Notification functions
         function markNotificationAsRead(notificationId) {
-            return fetch(`?mark_read=1&notification_id=${notificationId}`)
-                .then(response => response.json())
+            return fetch('', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: `action=mark_read&notification_id=${notificationId}`
+        })
+            .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         updateNotificationCount();

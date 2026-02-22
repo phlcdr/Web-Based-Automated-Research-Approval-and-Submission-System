@@ -240,14 +240,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $can_submit && !isset($_POST['actio
 
                     if ($current_chapter) {
                         // Update existing chapter (resubmission)
-                        $sql = "UPDATE submissions SET document_path = ?, status = 'pending', submission_date = NOW() WHERE submission_id = ?";
+                        $sql = "UPDATE submissions SET document_path = ?, status = 'pending', created_at = NOW() WHERE submission_id = ?";
                         $stmt = $conn->prepare($sql);
                         $stmt->execute([$relative_path, $current_chapter['submission_id']]);
                         $submission_id = $current_chapter['submission_id'];
                     } else {
                         // FIXED: Insert new chapter into submissions table
                         $chapter_title = "Chapter " . $chapter_number;
-                        $sql = "INSERT INTO submissions (group_id, submission_type, title, chapter_number, document_path, status, submission_date) VALUES (?, 'chapter', ?, ?, ?, 'pending', NOW())";
+                        $sql = "INSERT INTO submissions (group_id, submission_type, title, chapter_number, document_path, status, created_at) VALUES (?, 'chapter', ?, ?, ?, 'pending', NOW())";
                         $stmt = $conn->prepare($sql);
                         $stmt->execute([$group['group_id'], $chapter_title, $chapter_number, $relative_path]);
                         $submission_id = $conn->lastInsertId();
@@ -341,7 +341,7 @@ $stmt = $conn->prepare("
         type,
         context_type,
         context_id,
-        created_at as submission_date
+        created_at
     FROM notifications 
     WHERE user_id = ? AND is_read = 0
     ORDER BY created_at DESC 
@@ -1876,7 +1876,7 @@ $chapter_info = [
                         </div>
                         <div class="text-end">
                             <small class="text-muted">Submitted</small><br>
-                            <strong><?php echo date('M d, Y', strtotime($current_chapter['submission_date'])); ?></strong>
+                            <strong><?php echo date('M d, Y', strtotime($current_chapter['created_at'])); ?></strong>
                         </div>
                     </div>
                 <?php endif; ?>

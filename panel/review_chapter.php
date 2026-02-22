@@ -80,7 +80,7 @@ $stmt = $conn->prepare("
         type,
         context_type,
         context_id,
-        created_at as submission_date
+        created_at as created_at
     FROM notifications 
     WHERE user_id = ? AND is_read = 0
     ORDER BY created_at DESC 
@@ -1097,7 +1097,7 @@ if (!empty($chapter['document_path'])) {
                                                             <?php echo htmlspecialchars(substr($notif['message'], 0, 60)); ?><?php echo strlen($notif['message']) > 60 ? '...' : ''; ?>
                                                         </div>
                                                         <div class="notification-time">
-                                                            <?php echo date('M d, g:i A', strtotime($notif['submission_date'])); ?>
+                                                            <?php echo date('M d, g:i A', strtotime($notif['created_at'])); ?>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1238,7 +1238,7 @@ if (!empty($chapter['document_path'])) {
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <h6 class="text-muted mb-2">Submission Date:</h6>
-                                <p class="mb-0"><?php echo date('F d, Y', strtotime($chapter['submission_date'])); ?></p>
+                                <p class="mb-0"><?php echo date('F d, Y', strtotime($chapter['created_at'])); ?></p>
                             </div>
                             <div class="col-md-6">
                                 <h6 class="text-muted mb-2">Chapter Status:</h6>

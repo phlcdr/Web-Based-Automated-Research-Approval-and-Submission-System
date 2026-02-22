@@ -67,7 +67,7 @@ $stmt = $conn->prepare("
         type,
         context_type,
         context_id,
-        created_at as submission_date
+        created_at as created_at
     FROM notifications 
     WHERE user_id = ? AND is_read = 0
     ORDER BY created_at DESC 
@@ -105,7 +105,7 @@ $stmt = $conn->prepare("
         (SELECT COUNT(*) FROM submissions WHERE group_id = rg.group_id AND submission_type = 'chapter') as total_chapters,
         (SELECT COUNT(*) FROM submissions WHERE group_id = rg.group_id AND submission_type = 'chapter' AND status = 'approved') as approved_chapters,
         (SELECT COUNT(*) FROM submissions WHERE group_id = rg.group_id AND submission_type = 'chapter' AND status = 'pending') as pending_chapters,
-        (SELECT MAX(s.submission_date) FROM submissions s WHERE s.group_id = rg.group_id) as last_activity
+        (SELECT MAX(s.created_at) FROM submissions s WHERE s.group_id = rg.group_id) as last_activity
     FROM research_groups rg
     JOIN users u ON rg.lead_student_id = u.user_id
     WHERE rg.adviser_id = ?
@@ -130,7 +130,7 @@ $stmt = $conn->prepare("
     JOIN research_groups rg ON s.group_id = rg.group_id
     JOIN users u ON rg.lead_student_id = u.user_id
     WHERE rg.adviser_id = ? AND s.submission_type = 'chapter'
-    ORDER BY s.submission_date DESC
+    ORDER BY s.created_at DESC
     LIMIT 5
 ");
 $stmt->execute([$user_id]);
@@ -1119,7 +1119,7 @@ $recent_activities = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                             <?php echo htmlspecialchars(substr($notif['message'], 0, 60)); ?><?php echo strlen($notif['message']) > 60 ? '...' : ''; ?>
                                                         </div>
                                                         <div class="notification-time">
-                                                            <?php echo date('M d, g:i A', strtotime($notif['submission_date'])); ?>
+                                                            <?php echo date('M d, g:i A', strtotime($notif['created_at'])); ?>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1390,7 +1390,7 @@ $recent_activities = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         </p>
                                         <small class="text-muted">
                                             <i class="bi bi-calendar me-1"></i>
-                                            <?php echo date('M d, Y \a\t h:i A', strtotime($activity['submission_date'])); ?>
+                                            <?php echo date('M d, Y \a\t h:i A', strtotime($activity['date'])); ?>
                                         </small>
                                     </div>
                                     <span class="academic-badge <?php echo $activity['status'] == 'approved' ? 'success' : ($activity['status'] == 'rejected' ? 'warning' : 'primary'); ?>">

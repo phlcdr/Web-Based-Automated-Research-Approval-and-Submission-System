@@ -99,7 +99,7 @@ if (!$group) {
 
 // Get current title from submissions table
 $current_title = null;
-$stmt = $conn->prepare("SELECT * FROM submissions WHERE group_id = ? AND submission_type = 'title' ORDER BY submission_date DESC LIMIT 1");
+$stmt = $conn->prepare("SELECT * FROM submissions WHERE group_id = ? AND submission_type = 'title' ORDER BY created_at DESC LIMIT 1");
 $stmt->execute([$group['group_id']]);
 $result = $stmt->fetch(PDO::FETCH_ASSOC);
 if ($result) {
@@ -122,7 +122,7 @@ try {
             AND a.is_active = 1
         WHERE s.group_id = ? AND s.submission_type = 'title'
         GROUP BY s.submission_id
-        ORDER BY s.submission_date DESC
+        ORDER BY s.created_at DESC
     ");
     $stmt->execute([$group['group_id']]);
     $all_titles = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -151,7 +151,7 @@ $stmt = $conn->prepare("
         type,
         context_type,
         context_id,
-        created_at as submission_date
+        created_at
     FROM notifications 
     WHERE user_id = ? AND is_read = 0
     ORDER BY created_at DESC 
@@ -211,7 +211,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
             $conn->beginTransaction();
 
             // Insert into submissions table (required_approvals will be set when reviewers are assigned)
-            $sql = "INSERT INTO submissions (group_id, submission_type, title, description, document_path, status, submission_date) VALUES (?, 'title', ?, ?, ?, 'pending', NOW())";
+            $sql = "INSERT INTO submissions (group_id, submission_type, title, description, document_path, status, created_at) VALUES (?, 'title', ?, ?, ?, 'pending', NOW())";
             $stmt = $conn->prepare($sql);
             $stmt->execute([$group['group_id'], $title, $description, $document_path]);
             $submission_id = $conn->lastInsertId();
@@ -1359,7 +1359,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
                                                             <?php echo htmlspecialchars(substr($notif['message'], 0, 60)); ?><?php echo strlen($notif['message']) > 60 ? '...' : ''; ?>
                                                         </div>
                                                         <div class="notification-time">
-                                                            <?php echo $notif['submission_date'] ? date('M d, g:i A', strtotime($notif['submission_date'])) : 'Recently'; ?>
+                                                            <?php echo $notif['created_at'] ? date('M d, g:i A', strtotime($notif['created_at'])) : 'Recently'; ?>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1577,7 +1577,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
                                                 "<?php echo htmlspecialchars($title_item['title']); ?>"
                                             </h6>
                                             <small class="text-muted">
-                                                Submitted <?php echo date('F d, Y', strtotime($title_item['submission_date'])); ?>
+                                                Submitted <?php echo date('F d, Y', strtotime($title_item['created_at'])); ?>
                                                 <?php if ($index === 0): ?>
                                                     <span class="badge bg-primary ms-1">Latest</span>
                                                 <?php endif; ?>

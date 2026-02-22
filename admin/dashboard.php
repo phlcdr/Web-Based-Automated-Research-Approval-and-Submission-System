@@ -69,12 +69,12 @@ $stats['total_groups'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
 
 // FIXED: Get statistics from actual tables
 $submission_stats = $conn->query("SELECT 
-    COUNT(CASE WHEN submission_type = 'title' AND status = 'pending' THEN 1 END) as pending_titles,
-    COUNT(CASE WHEN submission_type = 'title' AND status = 'approved' THEN 1 END) as approved_titles
+    COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending_submissions,
+    COUNT(CASE WHEN status = 'approved' THEN 1 END) as approved_submissions
     FROM submissions")->fetch(PDO::FETCH_ASSOC);
 
-$stats['pending_titles'] = $submission_stats['pending_titles'];
-$stats['approved_titles'] = $submission_stats['approved_titles'];
+$stats['pending_submissions'] = $submission_stats['pending_submissions'];
+$stats['approved_submissions'] = $submission_stats['approved_submissions'];
 
 // Count pending user registrations
 $stmt = $conn->query("SELECT COUNT(*) as count FROM users WHERE registration_status = 'pending'");
@@ -84,13 +84,13 @@ $stats['pending_registrations'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
 $stmt = $conn->query("
     SELECT s.submission_type as type, 
            s.title as item_name, 
-           s.submission_date as date,
+           s.created_at as date,
            CONCAT(u.first_name, ' ', u.last_name) as student_name, 
            s.status
     FROM submissions s
     JOIN research_groups rg ON s.group_id = rg.group_id
     JOIN users u ON rg.lead_student_id = u.user_id
-        ORDER BY s.submitted_at DESC
+        ORDER BY s.created_at DESC
     LIMIT 10
 ");
 $recent_activities = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -104,7 +104,7 @@ $stmt = $conn->prepare("
         type,
         context_type,
         context_id,
-        created_at as submission_date
+        created_at as created_at
     FROM notifications 
     WHERE user_id = ? AND is_read = 0
     ORDER BY created_at DESC 
@@ -115,21 +115,6 @@ $recent_notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $total_unviewed = count($recent_notifications);
 
 // Function to get notification redirect URL
-function getNotificationRedirectUrl($notification) {
-    switch ($notification['type']) {
-        case 'user_registration':
-            return 'manage_users.php?status=pending';
-        case 'title_submission':
-        case 'chapter_submission':
-            return 'manage_research.php?tab=submissions&status=pending';
-        case 'reviewer_assignment':
-            return 'manage_research.php?tab=groups';
-        case 'discussion_update':
-            return 'manage_research.php?tab=groups';
-        default:
-            return 'dashboard.php';
-    }
-}
 ?>
 
 <!DOCTYPE html>
@@ -646,6 +631,54 @@ function getNotificationRedirectUrl($notification) {
             opacity: 0.8;
         }
 
+        /* Nav Badge */
+        .badge-notification {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--university-gold);
+            color: white;
+            border-radius: 50%;
+            min-width: 18px;
+            height: 18px;
+            font-size: 0.65rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2px;
+            border: 1px solid white;
+            font-weight: 700;
+        }
+
+        /* Status Cards */
+        .status-card {
+            background: rgba(248, 250, 252, 1);
+            border-radius: 8px;
+            padding: 1.25rem;
+            border: 1px solid var(--border-light);
+            transition: all 0.3s ease;
+        }
+
+        .status-card:hover {
+            background: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .status-card h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .status-card p {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Empty State */
         /* Empty State */
         .empty-state {
             text-align: center;
@@ -1050,18 +1083,26 @@ function getNotificationRedirectUrl($notification) {
                                 <?php if (count($recent_notifications) > 0): ?>
                                     <?php foreach ($recent_notifications as $notif): ?>
                                         <li>
-                                            <a href="<?php echo getNotificationRedirectUrl($notif); ?>" 
+                                            <a href="<?php echo get_notification_redirect_url($notif, 'admin'); ?>" 
                                             class="notification-item" 
                                             data-notification-id="<?php echo $notif['notification_id']; ?>">
                                                 <div class="d-flex align-items-start">
                                                     <div class="notification-icon <?php echo $notif['type']; ?>">
                                                         <i class="bi bi-<?php 
                                                             switch($notif['type']) {
-                                                                case 'user_registration': echo 'person-plus';
-                                                                case 'title_submission': echo 'journal-check';
-                                                                case 'chapter_submission': echo 'file-earmark-check';
-                                                                case 'reviewer_assignment': echo 'people';
-                                                                case 'discussion_update': echo 'chat-square-text';
+                                                                case 'user_registration': echo 'person-plus'; break;
+                                                                case 'title_submission':
+                                                                case 'title_assignment': echo 'journal-check'; break;
+                                                                case 'chapter_submission':
+                                                                case 'chapter_review': echo 'file-earmark-check'; break;
+                                                                case 'reviewer_assigned':
+                                                                case 'reviewer_assignment':
+                                                                case 'group_assignment': echo 'people'; break;
+                                                                case 'discussion_update':
+                                                                case 'discussion_added':
+                                                                case 'discussion':
+                                                                case 'thesis_message':
+                                                                case 'chapter_message': echo 'chat-square-text'; break;
                                                                 default: echo 'info-circle';
                                                             }
                                                         ?>"></i>
@@ -1074,7 +1115,7 @@ function getNotificationRedirectUrl($notification) {
                                                             <?php echo htmlspecialchars(substr($notif['message'], 0, 60)) . (strlen($notif['message']) > 60 ? '...' : ''); ?>
                                                         </div>
                                                         <div class="notification-time">
-                                                            <?php echo date('M d, g:i A', strtotime($notif['submission_date'])); ?>
+                                                            <?php echo date('M d, g:i A', strtotime($notif['created_at'])); ?>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1213,13 +1254,13 @@ function getNotificationRedirectUrl($notification) {
                         <div class="row text-center g-3">
                             <div class="col-6">
                                 <div class="status-card pending">
-                                    <h3 style="color: var(--warning-orange)"><?php echo $stats['pending_titles']; ?></h3>
+                                    <h3 style="color: var(--warning-orange)"><?php echo $stats['pending_submissions']; ?></h3>
                                     <p class="mb-0">Pending Review</p>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="status-card approved">
-                                    <h3 style="color: var(--success-green)"><?php echo $stats['approved_titles']; ?></h3>
+                                    <h3 style="color: var(--success-green)"><?php echo $stats['approved_submissions']; ?></h3>
                                     <p class="mb-0">Approved</p>
                                 </div>
                             </div>

@@ -76,7 +76,7 @@ $stmt = $conn->prepare("
         type,
         context_type,
         context_id,
-        created_at as submission_date
+        created_at as created_at
     FROM notifications 
     WHERE user_id = ? AND is_read = 0
     ORDER BY created_at DESC 
@@ -114,7 +114,7 @@ try {
             ))
             ORDER BY 
                 CASE WHEN (SELECT COUNT(*) FROM reviews WHERE submission_id = s.submission_id AND decision = 'approve') < COALESCE(s.required_approvals, 3) THEN 0 ELSE 1 END,
-                s.submission_date DESC
+                created_at DESC
         ");
         $stmt->execute([$user_id, $user_id, $user_id]);
         $titles = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -1018,7 +1018,7 @@ $pending_reviews = count(array_filter($titles, function ($t) {
                                                             <?php echo htmlspecialchars(substr($notif['message'], 0, 60)); ?><?php echo strlen($notif['message']) > 60 ? '...' : ''; ?>
                                                         </div>
                                                         <div class="notification-time">
-                                                            <?php echo date('M d, g:i A', strtotime($notif['submission_date'])); ?>
+                                                            <?php echo date('M d, g:i A', strtotime($notif['created_at'])); ?>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1169,11 +1169,11 @@ $pending_reviews = count(array_filter($titles, function ($t) {
                                         <?php endif; ?>
                                         <td style="padding: 1rem; border: none; vertical-align: middle;">
                                             <div class="mb-1">
-                                                <?php echo date('M d, Y', strtotime($title['submission_date'])); ?>
+                                                <?php echo date('M d, Y', strtotime($title['created_at'])); ?>
                                             </div>
-                                            <small style="color: var(--text-secondary);">
-                                                <?php echo date('h:i A', strtotime($title['submission_date'])); ?>
-                                            </small>
+                                            <div class="text-muted" style="font-size: 0.8rem;">
+                                                <?php echo date('h:i A', strtotime($title['created_at'])); ?>
+                                            </div>
                                         </td>
                                         <td style="padding: 1rem; border: none; vertical-align: middle;">
                                             <div class="d-flex align-items-center mb-1">

@@ -21,7 +21,7 @@ try {
         SELECT 
             s.submission_id,
             s.title,
-            s.submission_date,
+            s.created_at,
             s.status,
             rg.college,
             COUNT(DISTINCT a.assignment_id) as reviewer_count
@@ -33,7 +33,7 @@ try {
             AND a.is_active = 1
         WHERE s.group_id = ? AND s.submission_type = 'title'
         GROUP BY s.submission_id
-        ORDER BY s.submission_date DESC
+        ORDER BY s.created_at DESC
     ");
     $stmt->execute([$group_id]);
     $submissions = $stmt->fetchAll(PDO::FETCH_ASSOC);

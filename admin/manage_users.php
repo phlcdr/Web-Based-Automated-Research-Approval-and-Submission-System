@@ -95,7 +95,7 @@ $stmt = $conn->prepare("
         type,
         context_type,
         context_id,
-        created_at as submission_date
+        created_at as created_at
     FROM notifications 
     WHERE user_id = ? AND is_read = 0
     ORDER BY created_at DESC 
@@ -209,23 +209,6 @@ if (isset($_POST['ajax_update_user'])) {
     }
     exit;
 }
-// Function to get notification redirect URL
-function getNotificationRedirectUrl($notification) {
-    switch ($notification['type']) {
-        case 'user_registration':
-            return 'manage_users.php?status=pending';
-        case 'title_submission':
-        case 'chapter_submission':
-            return 'manage_research.php?tab=submissions&status=pending';
-        case 'reviewer_assignment':
-            return 'manage_research.php?tab=groups';
-        case 'discussion_update':
-            return 'manage_research.php?tab=groups';
-        default:
-            return 'dashboard.php';
-    }
-}
-
 
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -1498,7 +1481,7 @@ $users = $users_stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <?php if (count($recent_notifications) > 0): ?>
                                     <?php foreach ($recent_notifications as $notif): ?>
                                         <li>
-                                            <a href="<?php echo getNotificationRedirectUrl($notif); ?>" 
+                                            <a href="<?php echo get_notification_redirect_url($notif, 'admin'); ?>" 
                                             class="notification-item" 
                                             data-notification-id="<?php echo $notif['notification_id']; ?>">
                                                 <div class="d-flex align-items-start">
@@ -1522,7 +1505,7 @@ $users = $users_stmt->fetchAll(PDO::FETCH_ASSOC);
                                                             <?php echo htmlspecialchars(substr($notif['message'], 0, 60)) . (strlen($notif['message']) > 60 ? '...' : ''); ?>
                                                         </div>
                                                         <div class="notification-time">
-                                                            <?php echo date('M d, g:i A', strtotime($notif['submission_date'])); ?>
+                                                            <?php echo date('M d, g:i A', strtotime($notif['created_at'])); ?>
                                                         </div>
                                                     </div>
                                                 </div>

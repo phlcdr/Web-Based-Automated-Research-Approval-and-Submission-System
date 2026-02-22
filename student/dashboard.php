@@ -25,29 +25,6 @@ if (isset($_POST['action']) && $_POST['action'] === 'mark_all_read') {
     }
 }
 
-// Handle marking notifications as read (existing code - keep as is)
-if (isset($_POST['action']) && $_POST['action'] === 'mark_read') {
-    $notification_id = (int)($_POST['notification_id'] ?? 0);
-    
-    if ($notification_id) {
-        try {
-            $stmt = $conn->prepare("
-                UPDATE notifications 
-                SET is_read = 1 
-                WHERE notification_id = ? AND user_id = ?
-            ");
-            $stmt->execute([$notification_id, $user_id]);
-            echo json_encode(['success' => true]);
-            exit;
-        } catch (Exception $e) {
-            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
-            exit;
-        }
-    }
-    echo json_encode(['success' => false, 'error' => 'Invalid notification ID']);
-    exit;
-}
-
 // Handle marking notifications as read
 if (isset($_POST['action']) && $_POST['action'] === 'mark_read') {
     $notification_id = (int)($_POST['notification_id'] ?? 0);
@@ -106,7 +83,7 @@ $group = $stmt->fetch(PDO::FETCH_ASSOC);
 // Get research title if group exists
 $title = null;
 if ($group) {
-    $stmt = $conn->prepare("SELECT * FROM submissions WHERE group_id = ? AND submission_type = 'title' ORDER BY submission_date DESC LIMIT 1");
+    $stmt = $conn->prepare("SELECT * FROM submissions WHERE group_id = ? AND submission_type = 'title' ORDER BY created_at DESC LIMIT 1");
     $stmt->execute([$group['group_id']]);
     $title = $stmt->fetch(PDO::FETCH_ASSOC);
 }
@@ -128,7 +105,7 @@ $stmt = $conn->prepare("
         type,
         context_type,
         context_id,
-        created_at as submission_date
+        created_at
     FROM notifications 
     WHERE user_id = ? AND is_read = 0
     ORDER BY created_at DESC 
@@ -947,11 +924,7 @@ if ($group) {
                                 <?php if (count($recent_notifications) > 0): ?>
                                     <?php foreach ($recent_notifications as $notif): ?>
                                         <li>
-                                            <a href="<?php 
-                                                if (strpos($notif['type'], 'title') !== false) echo 'submit_title.php';
-                                                elseif (strpos($notif['type'], 'chapter') !== false) echo 'submit_chapter.php';
-                                                else echo 'thesis_discussion.php';
-                                            ?>" 
+                                            <a href="<?php echo get_notification_redirect_url($notif, 'student'); ?>" 
                                             class="notification-item" 
                                             data-notification-id="<?php echo $notif['notification_id']; ?>">
                                                 <div class="d-flex align-items-start">
@@ -970,7 +943,7 @@ if ($group) {
                                                             <?php echo htmlspecialchars(substr($notif['message'], 0, 60)) . (strlen($notif['message']) > 60 ? '...' : ''); ?>
                                                         </div>
                                                         <div class="notification-time">
-                                                            <?php echo date('M d, g:i A', strtotime($notif['submission_date'])); ?>
+                                                            <?php echo date('M d, g:i A', strtotime($notif['created_at'])); ?>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1225,7 +1198,7 @@ if ($group) {
                                     <?php echo ucfirst($title['status']); ?>
                                 </span>
                             </div>
-                            <small class="text-muted">Submitted: <?php echo date('M d, Y', strtotime($title['submission_date'])); ?></small>
+                            <small class="text-muted">Submitted: <?php echo date('M d, Y', strtotime($title['created_at'])); ?></small>
                         </div>
 
                         <div class="row">
@@ -1292,7 +1265,7 @@ if ($group) {
                                         <div class="mt-2">
                                             <?php if ($chapter): ?>
                                                 <small class="text-muted">
-                                                    Submitted: <?php echo date('M d, Y', strtotime($chapter['submission_date'])); ?>
+                                                    Submitted: <?php echo date('M d, Y', strtotime($chapter['created_at'])); ?>
                                                 </small>
                                             <?php elseif ($can_submit): ?>
                                                 <a href="submit_chapter.php?chapter=<?php echo $i; ?>" class="btn btn-sm btn-primary">

@@ -139,7 +139,7 @@ try {
                         s.description,
                         s.submission_type as item_type,
                         s.status,
-                        s.submission_date as submitted_at,
+                        s.created_at as submitted_at,
                         s.approval_date,
                         s.document_path as file_path,
                         CONCAT(u.first_name, ' ', u.last_name) as submitter_name,
@@ -151,7 +151,7 @@ try {
                     LEFT JOIN research_groups rg ON s.group_id = rg.group_id
                     LEFT JOIN users u ON rg.lead_student_id = u.user_id
                     $where_clause
-                    ORDER BY s.submission_date DESC
+                    ORDER BY s.created_at DESC
                     LIMIT $limit OFFSET $offset";
     
     $stmt = $conn->prepare($research_sql);
@@ -171,7 +171,7 @@ $stmt = $conn->prepare("
         type,
         context_type,
         context_id,
-        created_at as submission_date
+        created_at as created_at
     FROM notifications 
     WHERE user_id = ? AND is_read = 0
     ORDER BY created_at DESC 
@@ -181,24 +181,9 @@ $stmt->execute([$user_id]);
 $recent_notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $total_unviewed = count($recent_notifications);
 
-// Function to get notification redirect URL
-function getNotificationRedirectUrl($notification) {
-    switch ($notification['type']) {
-        case 'user_registration':
-            return 'manage_users.php?status=pending';
-        case 'title_submission':
-        case 'chapter_submission':
-            return 'manage_research.php?tab=submissions&status=pending';
-        case 'reviewer_assignment':
-            return 'manage_research.php?tab=groups';
-        case 'discussion_update':
-            return 'manage_research.php?tab=groups';
-        default:
-            return 'dashboard.php';
-    }
-}
-
-// Function to get status badge class (preserving original function)
+?>
+<!-- Function to get status badge class (preserving original function) -->
+<?php
 function getStatusBadgeClass($status) {
     switch (strtolower($status)) {
         case 'approved':
@@ -1681,7 +1666,7 @@ function getStatusBadgeClass($status) {
                                 <?php if (count($recent_notifications) > 0): ?>
                                     <?php foreach ($recent_notifications as $notif): ?>
                                         <li>
-                                            <a href="<?php echo getNotificationRedirectUrl($notif); ?>" 
+                                            <a href="<?php echo get_notification_redirect_url($notif, 'admin'); ?>" 
                                             class="notification-item" 
                                             data-notification-id="<?php echo $notif['notification_id']; ?>">
                                                 <div class="d-flex align-items-start">
@@ -1705,7 +1690,7 @@ function getStatusBadgeClass($status) {
                                                             <?php echo htmlspecialchars(substr($notif['message'], 0, 60)) . (strlen($notif['message']) > 60 ? '...' : ''); ?>
                                                         </div>
                                                         <div class="notification-time">
-                                                            <?php echo date('M d, g:i A', strtotime($notif['submission_date'])); ?>
+                                                            <?php echo date('M d, g:i A', strtotime($notif['created_at'])); ?>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -2525,7 +2510,7 @@ function getStatusBadgeClass($status) {
                                 <div class="row text-muted small">
                                     <div class="col-md-6">
                                         <i class="bi bi-calendar3 me-1"></i>
-                                        Submitted: ${new Date(submission.submission_date).toLocaleDateString()}
+                                        Submitted: ${new Date(submission.created_at).toLocaleDateString()}
                                     </div>
                                     ${submission.approval_date ? `
                                         <div class="col-md-6">
@@ -2589,7 +2574,7 @@ function getStatusBadgeClass($status) {
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <div class="flex-grow-1">
                                     <h6 class="mb-1">${submission.title}</h6>
-                                    <small class="text-muted">Submitted: ${new Date(submission.submission_date).toLocaleDateString()}</small>
+                                    <small class="text-muted">Submitted: ${new Date(submission.created_at).toLocaleDateString()}</small>
                                 </div>
                                 <div>
                                     ${statusBadge}

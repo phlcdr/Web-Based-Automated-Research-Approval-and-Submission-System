@@ -773,6 +773,67 @@ function get_thesis_discussion_status($conn, $user_id) {
     }
 }
 
+/**
+ * Centralized function to get notification redirection URL based on type and role
+ */
+function get_notification_redirect_url($notif, $role) {
+    $type = $notif['type'] ?? '';
+    $context_id = $notif['context_id'] ?? '';
+    $message = $notif['message'] ?? '';
+    $context_type = $notif['context_type'] ?? '';
+
+    switch ($role) {
+        case 'admin':
+            switch ($type) {
+                case 'user_registration':
+                    return 'manage_users.php?status=pending';
+                case 'title_submission':
+                case 'chapter_submission':
+                case 'chapter_review':
+                case 'reviewer_assigned':
+                    return 'manage_research.php?tab=submissions&status=pending';
+                case 'title_assignment':
+                case 'group_assignment':
+                case 'reviewer_assignment':
+                case 'discussion_update':
+                case 'discussion_added':
+                case 'discussion':
+                case 'thesis_message':
+                case 'chapter_message':
+                    return 'manage_research.php?tab=groups';
+                default:
+                    return 'dashboard.php';
+            }
+        case 'student':
+            if (strpos($type, 'title') !== false) return 'submit_title.php';
+            if (strpos($type, 'chapter') !== false) return 'submit_chapter.php';
+            if (strpos($type, 'discussion') !== false || strpos($type, 'message') !== false) return 'thesis_discussion.php';
+            return 'dashboard.php';
+        case 'panel':
+        case 'adviser':
+            // If it's a specific submission, go to the review page if context_id exists
+            if (($type == 'title' || strpos($message, 'title') !== false) && $context_id && $context_type == 'submission') {
+                return "review_title.php?id=$context_id";
+            }
+            if (($type == 'chapter' || strpos($message, 'chapter') !== false) && $context_id && $context_type == 'submission') {
+                return "review_chapter.php?id=$context_id";
+            }
+            
+            // Fallback for general categories
+            if ($type == 'title' || strpos($message, 'title') !== false) return 'review_titles.php';
+            if ($type == 'chapter' || strpos($message, 'chapter') !== false) return 'review_chapters.php';
+            if (strpos($type, 'discussion') !== false || strpos($message, 'discussion') !== false || $context_type == 'discussion') {
+                if ($context_id && $context_type == 'discussion') {
+                    return "thesis_discussion.php?id=$context_id";
+                }
+                return 'thesis_inbox.php';
+            }
+            return 'dashboard.php';
+        default:
+            return 'dashboard.php';
+    }
+}
+
 // Auto-cleanup on random page loads (1% chance)
 if (isset($conn) && rand(1, 100) === 1) {
     cleanup_security_data($conn);

@@ -84,7 +84,7 @@ $stmt = $conn->prepare("
         type,
         context_type,
         context_id,
-        created_at as submission_date
+        created_at
     FROM notifications 
     WHERE user_id = ? AND is_read = 0
     ORDER BY created_at DESC 
@@ -212,18 +212,18 @@ if ($user_role === 'adviser') {
 // Get recent submissions
 if ($user_role === 'adviser') {
     $stmt = $conn->prepare("
-        SELECT s.submission_type as type, s.title as item, s.submission_date as date, 
+        SELECT s.submission_type as type, s.title as item, s.created_at as date, 
                CONCAT(u.first_name, ' ', u.last_name) as student_name, s.status
         FROM submissions s 
         JOIN research_groups rg ON s.group_id = rg.group_id 
         JOIN users u ON rg.lead_student_id = u.user_id
         WHERE rg.adviser_id = ?
-        ORDER BY s.submission_date DESC LIMIT 5
+        ORDER BY s.created_at DESC LIMIT 5
     ");
     $stmt->execute([$user_id]);
 } else {
     $stmt = $conn->prepare("
-        SELECT s.submission_type as type, s.title as item, s.submission_date as date, 
+        SELECT s.submission_type as type, s.title as item, s.created_at as date, 
                CONCAT(u.first_name, ' ', u.last_name) as student_name, s.status
         FROM submissions s 
         JOIN assignments a ON s.submission_id = a.context_id 
@@ -231,7 +231,7 @@ if ($user_role === 'adviser') {
         JOIN research_groups rg ON s.group_id = rg.group_id 
         JOIN users u ON rg.lead_student_id = u.user_id
         WHERE a.user_id = ?
-        ORDER BY s.submission_date DESC LIMIT 5
+        ORDER BY s.created_at DESC LIMIT 5
     ");
     $stmt->execute([$user_id]);
 }
@@ -1181,17 +1181,7 @@ $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <?php if (count($recent_notifications) > 0): ?>
                                     <?php foreach ($recent_notifications as $notif): ?>
                                         <li>
-                                            <a href="<?php 
-                                                if ($notif['type'] == 'title' || ($notif['context_type'] == 'submission' && strpos($notif['message'], 'title') !== false)) {
-                                                    echo 'review_titles.php';
-                                                } elseif ($notif['type'] == 'chapter' || ($notif['context_type'] == 'submission' && strpos($notif['message'], 'chapter') !== false)) {
-                                                    echo 'review_chapters.php';
-                                                } elseif ($notif['type'] == 'discussion' || $notif['context_type'] == 'discussion') {
-                                                    echo 'thesis_inbox.php';
-                                                } else {
-                                                    echo 'dashboard.php';
-                                                }
-                                            ?>" class="notification-item" 
+                                            <a href="<?php echo get_notification_redirect_url($notif, $user_role); ?>" class="notification-item" 
                                             data-notification-id="<?php echo $notif['notification_id']; ?>"
                                             data-type="<?php echo $notif['type']; ?>">
                                                 <div class="d-flex align-items-start">
@@ -1216,7 +1206,7 @@ $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                             <?php echo htmlspecialchars(substr($notif['message'], 0, 60)); ?><?php echo strlen($notif['message']) > 60 ? '...' : ''; ?>
                                                         </div>
                                                         <div class="notification-time">
-                                                            <?php echo date('M d, g:i A', strtotime($notif['submission_date'])); ?>
+                                                            <?php echo date('M d, g:i A', strtotime($notif['created_at'])); ?>
                                                         </div>
                                                     </div>
                                                 </div>

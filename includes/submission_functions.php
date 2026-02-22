@@ -69,7 +69,7 @@ function get_submissions($conn, $filters = []) {
         $sql .= " WHERE " . implode(" AND ", $where_conditions);
     }
     
-    $sql .= " ORDER BY s.submission_date DESC";
+    $sql .= " ORDER BY s.created_at DESC";
     
     // Add pagination if provided
     if (!empty($filters['limit'])) {
@@ -316,13 +316,13 @@ function get_recent_activities($conn, $limit = 10) {
     $stmt = $conn->prepare("
         SELECT s.submission_type as type, 
                s.title as item_name, 
-               s.submission_date as date,
+               s.created_at as date,
                CONCAT(u.first_name, ' ', u.last_name) as student_name, 
                s.status
         FROM submissions s
         JOIN research_groups rg ON s.group_id = rg.group_id
         JOIN users u ON rg.lead_student_id = u.user_id
-        ORDER BY s.submission_date DESC
+        ORDER BY s.created_at DESC
         LIMIT ?
     ");
     $stmt->execute([$limit]);
