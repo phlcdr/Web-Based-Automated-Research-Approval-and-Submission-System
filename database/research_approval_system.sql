@@ -148,6 +148,7 @@ CREATE TABLE `login_attempts` (
   `username` varchar(30) NOT NULL,
   `ip_address` varchar(45) NOT NULL,
   `attempt_time` timestamp NOT NULL DEFAULT current_timestamp(),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `successful` tinyint(1) DEFAULT 0,
   `user_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -446,6 +447,7 @@ CREATE TABLE `reviews` (
   `comments` text DEFAULT NULL,
   `decision` enum('approve','reject','needs_revision') NOT NULL,
   `review_date` timestamp NOT NULL DEFAULT current_timestamp(),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `review_type` enum('title','chapter') NOT NULL DEFAULT 'title'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -477,6 +479,7 @@ CREATE TABLE `settings` (
   `id` int(11) NOT NULL,
   `setting_key` varchar(100) NOT NULL,
   `setting_value` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `created_by` int(11) DEFAULT NULL,
@@ -519,6 +522,7 @@ CREATE TABLE `submissions` (
   `document_path` varchar(255) DEFAULT NULL,
   `status` enum('pending','approved','rejected') DEFAULT 'pending',
   `submission_date` timestamp NOT NULL DEFAULT current_timestamp(),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `approval_date` datetime DEFAULT NULL,
   `revision_number` int(11) DEFAULT 1,
   `parent_submission_id` int(11) DEFAULT NULL,
@@ -548,6 +552,7 @@ CREATE TABLE `thesis_discussions` (
   `title_id` int(11) NOT NULL,
   `title` varchar(200) NOT NULL,
   `description` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -584,6 +589,7 @@ CREATE TABLE `users` (
   `locked_until` timestamp NULL DEFAULT NULL,
   `last_login` timestamp NULL DEFAULT NULL,
   `session_expires_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
