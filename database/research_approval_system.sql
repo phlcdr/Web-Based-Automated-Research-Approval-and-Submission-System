@@ -480,7 +480,6 @@ CREATE TABLE `settings` (
   `setting_key` varchar(100) NOT NULL,
   `setting_value` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `created_by` int(11) DEFAULT NULL,
   `updated_by` int(11) DEFAULT NULL
@@ -533,12 +532,12 @@ CREATE TABLE `submissions` (
 -- Dumping data for table `submissions`
 --
 
-INSERT INTO `submissions` (`submission_id`, `group_id`, `submission_type`, `title`, `description`, `chapter_number`, `document_path`, `status`, `submission_date`, `approval_date`, `revision_number`, `parent_submission_id`, `required_approvals`) VALUES
-(23, 7, 'title', 'Title', 'desctiption', NULL, 'uploads/titles/title_7_1761213218.pdf', 'approved', '2025-10-23 09:53:38', '2025-10-23 18:10:14', 1, NULL, 3),
-(24, 7, 'chapter', 'Chapter 1', NULL, 1, 'uploads/chapters/chapter_1_7_1761214257.pdf', 'approved', '2025-10-23 10:10:57', '2025-10-23 12:11:20', 1, NULL, 3),
-(25, 7, 'chapter', 'Chapter 2', NULL, 2, 'uploads/chapters/chapter_2_7_1761214372.docx', 'approved', '2025-10-23 10:12:52', '2025-10-23 12:14:14', 1, NULL, 3),
-(26, 7, 'chapter', 'Chapter 3', NULL, 3, 'uploads/chapters/chapter_3_7_1761214482.docx', 'approved', '2025-10-23 10:14:42', '2025-10-23 12:15:04', 1, NULL, 3),
-(27, 9, 'title', 'Title 1', 'short', NULL, 'uploads/titles/title_9_1761345562.pdf', 'approved', '2025-10-24 22:39:22', '2025-10-25 06:58:12', 1, NULL, 8);
+INSERT INTO `submissions` (`submission_id`, `group_id`, `submission_type`, `title`, `description`, `chapter_number`, `document_path`, `status`, `submission_date`, `created_at`, `approval_date`, `revision_number`, `parent_submission_id`, `required_approvals`) VALUES
+(23, 7, 'title', 'Title', 'desctiption', NULL, 'uploads/titles/title_7_1761213218.pdf', 'approved', '2025-10-23 09:53:38', '2025-10-23 09:53:38', '2025-10-23 18:10:14', 1, NULL, 3),
+(24, 7, 'chapter', 'Chapter 1', NULL, 1, 'uploads/chapters/chapter_1_7_1761214257.pdf', 'approved', '2025-10-23 10:10:57', '2025-10-23 10:10:57', '2025-10-23 12:11:20', 1, NULL, 3),
+(25, 7, 'chapter', 'Chapter 2', NULL, 2, 'uploads/chapters/chapter_2_7_1761214372.docx', 'approved', '2025-10-23 10:12:52', '2025-10-23 10:12:52', '2025-10-23 12:14:14', 1, NULL, 3),
+(26, 7, 'chapter', 'Chapter 3', NULL, 3, 'uploads/chapters/chapter_3_7_1761214482.docx', 'approved', '2025-10-23 10:14:42', '2025-10-23 10:14:42', '2025-10-23 12:15:04', 1, NULL, 3),
+(27, 9, 'title', 'Title 1', 'short', NULL, 'uploads/titles/title_9_1761345562.pdf', 'approved', '2025-10-24 22:39:22', '2025-10-24 22:39:22', '2025-10-25 06:58:12', 1, NULL, 8);
 
 -- --------------------------------------------------------
 
@@ -552,7 +551,6 @@ CREATE TABLE `thesis_discussions` (
   `title_id` int(11) NOT NULL,
   `title` varchar(200) NOT NULL,
   `description` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -589,7 +587,6 @@ CREATE TABLE `users` (
   `locked_until` timestamp NULL DEFAULT NULL,
   `last_login` timestamp NULL DEFAULT NULL,
   `session_expires_at` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
