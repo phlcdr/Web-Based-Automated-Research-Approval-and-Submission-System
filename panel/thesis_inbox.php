@@ -1041,7 +1041,7 @@ try {
                             </div>
                             <div class="user-info d-none d-md-block">
                                 <div class="user-name"><?php echo htmlspecialchars($_SESSION['full_name']); ?></div>
-                                <div class="user-role"><?php echo $user_role === 'adviser' ? 'Faculty Member' : 'Panel Member'; ?></div>
+                                <div class="user-role"><?php echo $user_role === 'adviser' ? 'Faculty Member' : 'Faculty Member'; ?></div>
                             </div>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">

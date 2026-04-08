@@ -1051,7 +1051,7 @@ $pending_reviews = count(array_filter($titles, function ($t) {
                             </div>
                             <div class="d-none d-md-block">
                                 <div style="font-size: 0.85rem; font-weight: 600;"><?php echo htmlspecialchars($_SESSION['full_name']); ?></div>
-                                <div style="font-size: 0.7rem; opacity: 0.8;"><?php echo $user_role === 'adviser' ? 'Faculty Member' : 'Panel Member'; ?></div>
+                                <div style="font-size: 0.7rem; opacity: 0.8;"><?php echo $user_role === 'adviser' ? 'Faculty Member' : 'Faculty Member'; ?></div>
                             </div>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">

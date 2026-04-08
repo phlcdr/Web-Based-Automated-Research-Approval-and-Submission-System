@@ -1182,7 +1182,7 @@ $stats['pending_chapters'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
                             </div>
                             <div class="user-info d-none d-md-block">
                                 <div class="user-name"><?php echo htmlspecialchars($_SESSION['full_name']); ?></div>
-                                <div class="user-role"><?php echo $user_role === 'adviser' ? 'Faculty Member' : 'Panel Member'; ?></div>
+                                <div class="user-role"><?php echo $user_role === 'adviser' ? 'Faculty Member' : 'Faculty Member'; ?></div>
                             </div>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
@@ -1271,7 +1271,7 @@ $stats['pending_chapters'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
                         <p class="text-muted mb-3"><?php echo htmlspecialchars($user['email']); ?></p>
                         <span class="badge bg-<?php echo $user['role'] == 'adviser' ? 'success' : 'info'; ?> fs-6 px-3 py-2">
                             <i class="bi bi-<?php echo $user['role'] == 'adviser' ? 'person-check' : 'people'; ?> me-1"></i>
-                            <?php echo $user['role'] === 'adviser' ? 'Faculty Member' : 'Panel Member'; ?>
+                            <?php echo $user['role'] === 'adviser' ? 'Faculty Member' : 'Faculty Member'; ?>
                         </span>
                         
                         <hr class="my-4">
@@ -1469,7 +1469,7 @@ $stats['pending_chapters'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
                         <div class="border rounded p-3 h-100">
                             <h6 class="text-primary mb-2">Account Role</h6>
                             <span class="badge bg-<?php echo $user['role'] == 'adviser' ? 'success' : 'info'; ?>">
-                                <?php echo $user['role'] === 'adviser' ? 'Faculty Member' : 'Panel Member'; ?>
+                                <?php echo $user['role'] === 'adviser' ? 'Faculty Member' : 'Faculty Member'; ?>
                             </span>
                         </div>
                     </div>

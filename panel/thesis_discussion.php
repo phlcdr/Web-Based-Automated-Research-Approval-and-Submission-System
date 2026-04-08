@@ -216,9 +216,9 @@ $stmt = $conn->prepare("
         CONCAT(u.first_name, ' ', u.last_name) as participant_name,
         u.role as user_role,
         CASE 
-            WHEN rg.adviser_id = u.user_id THEN 'Primary Adviser'
+            WHEN rg.adviser_id = u.user_id THEN 'Primary Faculty Member'
             WHEN rg.lead_student_id = u.user_id THEN 'Student Researcher'
-            ELSE 'Panel Member'
+            ELSE 'Faculty Member'
         END as participant_role,
         u.email
     FROM thesis_discussions td
@@ -1511,7 +1511,7 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             </div>
                             <div class="user-info d-none d-md-block">
                                 <div class="user-name"><?php echo htmlspecialchars($user_name); ?></div>
-                                <div class="user-role"><?php echo $user_role === 'adviser' ? 'Faculty Member' : 'Panel Member'; ?></div>
+                                <div class="user-role"><?php echo $user_role === 'adviser' ? 'Faculty Member' : 'Faculty Member'; ?></div>
                             </div>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
