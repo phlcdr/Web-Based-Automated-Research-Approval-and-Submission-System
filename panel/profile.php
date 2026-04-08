@@ -1271,7 +1271,7 @@ $stats['pending_chapters'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
                         <p class="text-muted mb-3"><?php echo htmlspecialchars($user['email']); ?></p>
                         <span class="badge bg-<?php echo $user['role'] == 'adviser' ? 'success' : 'info'; ?> fs-6 px-3 py-2">
                             <i class="bi bi-<?php echo $user['role'] == 'adviser' ? 'person-check' : 'people'; ?> me-1"></i>
-                            <?php echo $user['role'] === 'adviser' ? 'Research Adviser' : 'Panel Member'; ?>
+                            <?php echo $user['role'] === 'adviser' ? 'Faculty Member' : 'Panel Member'; ?>
                         </span>
                         
                         <hr class="my-4">
@@ -1469,7 +1469,7 @@ $stats['pending_chapters'] = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
                         <div class="border rounded p-3 h-100">
                             <h6 class="text-primary mb-2">Account Role</h6>
                             <span class="badge bg-<?php echo $user['role'] == 'adviser' ? 'success' : 'info'; ?>">
-                                <?php echo $user['role'] === 'adviser' ? 'Research Adviser' : 'Panel Member'; ?>
+                                <?php echo $user['role'] === 'adviser' ? 'Faculty Member' : 'Panel Member'; ?>
                             </span>
                         </div>
                     </div>

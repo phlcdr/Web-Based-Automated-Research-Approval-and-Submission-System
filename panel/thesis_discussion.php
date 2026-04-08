@@ -1511,7 +1511,7 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             </div>
                             <div class="user-info d-none d-md-block">
                                 <div class="user-name"><?php echo htmlspecialchars($user_name); ?></div>
-                                <div class="user-role"><?php echo $user_role === 'adviser' ? 'Research Adviser' : 'Panel Member'; ?></div>
+                                <div class="user-role"><?php echo $user_role === 'adviser' ? 'Faculty Member' : 'Panel Member'; ?></div>
                             </div>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">

@@ -1132,7 +1132,7 @@ if (!empty($chapter['document_path'])) {
                             </div>
                             <div class="user-info d-none d-md-block">
                                 <div class="user-name"><?php echo htmlspecialchars($_SESSION['full_name']); ?></div>
-                                <div class="user-role">Research Adviser</div>
+                                <div class="user-role">Faculty Member</div>
                             </div>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
